@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scoreboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <h1>&#127942; Scoreboard</h1>
+    <div class="header-right">
+      <span class="refresh-timer">Refreshing in <span id="countdown">30</span>s</span>
+      <a href="config.html">&#9881; Settings</a>
+    </div>
+  </header>
+
+  <main>
+    <div id="sports-container"></div>
+
+    <div class="section-header" id="upcoming-header">
+      <h2>Upcoming This Week</h2>
+      <span class="count" id="upcoming-count">0</span>
+    </div>
+    <div id="upcoming-container">
+      <div class="loading">Loading upcoming games...</div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
