@@ -14,6 +14,15 @@
 
   <div class="config-main">
     <p class="config-description">Toggle leagues on or off. Changes save automatically.</p>
+
+    <div class="general-settings">
+      <label class="general-setting-row">
+        <span class="general-setting-label">Recent games: past</span>
+        <input type="number" id="recent-days-input" min="1" max="14" value="2" class="recent-days-input">
+        <span class="general-setting-label">days</span>
+      </label>
+    </div>
+
     <div id="config-grid" class="config-grid">
       <div class="loading">Loading...</div>
     </div>

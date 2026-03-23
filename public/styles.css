@@ -323,8 +323,47 @@ main {
 
 .config-description {
   color: var(--text-secondary);
-  margin-bottom: 28px;
+  margin-bottom: 20px;
   font-size: 13px;
+}
+
+.general-settings {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.general-setting-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.general-setting-label {
+  color: var(--text-secondary);
+}
+
+.recent-days-input {
+  width: 56px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.recent-days-input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
 }
 
 .config-grid {

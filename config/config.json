@@ -11,5 +11,6 @@
   "teamFilters": {
     "soccer/usa.1": "Inter Miami",
     "tennis/atp": "Argentina"
-  }
+  },
+  "recentDays": 1
 }

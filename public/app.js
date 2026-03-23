@@ -19,12 +19,12 @@ const isScoreboard = document.querySelector('#sports-container') !== null;
 /* ─────────────────────────────────────────────────────────────
    SCOREBOARD PAGE
 ───────────────────────────────────────────────────────────── */
-if (isScoreboard) {
-  let countdownValue = 30;
-  let countdownTimer = null;
-  let refreshTimer = null;
-  let recentRendered = false;
-  let recentGamesBySport = {};
+if (isScoreboard) (function () {
+  var countdownValue = 30;
+  var countdownTimer = null;
+  var refreshTimer = null;
+  var recentRendered = false;
+  var recentGamesBySport = {};
 
   const SPORT_PRIORITY = ['Soccer', 'Football', 'Basketball', 'Baseball', 'Hockey', 'Tennis'];
 
@@ -260,15 +260,16 @@ if (isScoreboard) {
       refreshTimer = setInterval(refresh, 30000);
     }
   });
-}
+})();
 
 /* ─────────────────────────────────────────────────────────────
    CONFIG PAGE
 ───────────────────────────────────────────────────────────── */
-if (isConfig) {
-  let saveTimer = null;
-  let enabledSet = new Set();
-  let teamFilters = {};  // { 'soccer/usa.1': 'Inter Miami', ... }
+if (isConfig) (function () {
+  var saveTimer = null;
+  var enabledSet = new Set();
+  var teamFilters = {};  // { 'soccer/usa.1': 'Inter Miami', ... }
+  var recentDays = 2;
 
   function showToast() {
     const toast = document.getElementById('toast');
@@ -286,7 +287,7 @@ if (isConfig) {
       const res = await fetch('api/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabledLeagues: [...enabledSet], teamFilters: cleanFilters }),
+        body: JSON.stringify({ enabledLeagues: [...enabledSet], teamFilters: cleanFilters, recentDays }),
       });
       if (res.ok) {
         showToast();
@@ -370,12 +371,23 @@ if (isConfig) {
       const config = await fetch('api/config').then(r => r.json());
       enabledSet = new Set(config.enabledLeagues || []);
       teamFilters = config.teamFilters || {};
+      recentDays = (Number.isInteger(config.recentDays) && config.recentDays >= 1) ? config.recentDays : 2;
     } catch (_) {
       enabledSet = new Set(ALL_LEAGUES.map(l => l.path));
       teamFilters = {};
+      recentDays = 2;
     }
+    document.getElementById('recent-days-input').value = recentDays;
     renderConfig();
   }
 
+  document.getElementById('recent-days-input').addEventListener('change', (e) => {
+    const val = parseInt(e.target.value, 10);
+    if (val >= 1) {
+      recentDays = val;
+      debouncedSave();
+    }
+  });
+
   loadConfig();
-}
+})();

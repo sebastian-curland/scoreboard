@@ -192,15 +192,51 @@ async function fetchLeagueScoreboard(leaguePath, dateParam) {
 
 const STATE_ORDER = { in: 0, post: 1, pre: 2 };
 
-async function getScoreboard(enabledLeagues, teamFilters = {}) {
-  const results = await Promise.allSettled(
+async function getScoreboard(enabledLeagues, teamFilters = {}, recentDays = 2) {
+  // Always fetch today for live + today's completed games
+  const todayResults = await Promise.allSettled(
     enabledLeagues.map(league => fetchLeagueScoreboard(league))
   );
-  const games = results
+  const todayGames = todayResults
     .filter(r => r.status === 'fulfilled')
     .flatMap(r => r.value)
     .filter(g => matchesTeamFilter(g, teamFilters[g.league]));
-  return games.sort((a, b) => {
+
+  // Fetch additional past days for completed games
+  const pastGames = [];
+  for (let i = 1; i < recentDays; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateParam = toDateStr(d);
+    const results = await Promise.allSettled(
+      enabledLeagues.map(league => fetchLeagueScoreboard(league, dateParam))
+    );
+    const games = results
+      .filter(r => r.status === 'fulfilled')
+      .flatMap(r => r.value)
+      .filter(g => g.state === 'post')
+      .filter(g => matchesTeamFilter(g, teamFilters[g.league]));
+    pastGames.push(...games);
+  }
+
+  // Filter today's post games to only those within the recentDays window
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - recentDays);
+  cutoff.setHours(0, 0, 0, 0);
+
+  const filteredTodayGames = todayGames.filter(g =>
+    g.state !== 'post' || new Date(g.gameTime) >= cutoff
+  );
+
+  // Merge, deduplicate by id, sort
+  const seen = new Set();
+  const allGames = [...filteredTodayGames, ...pastGames].filter(g => {
+    if (seen.has(g.id)) return false;
+    seen.add(g.id);
+    return true;
+  });
+
+  return allGames.sort((a, b) => {
     const stateDiff = (STATE_ORDER[a.state] ?? 3) - (STATE_ORDER[b.state] ?? 3);
     if (stateDiff !== 0) return stateDiff;
     return new Date(a.gameTime) - new Date(b.gameTime);

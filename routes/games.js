@@ -12,6 +12,7 @@ const DEFAULT_CONFIG = {
     'soccer/uefa.champions', 'soccer/arg.1', 'tennis/atp', 'tennis/wta',
   ],
   teamFilters: {},
+  recentDays: 2,
 };
 
 async function readConfig() {
@@ -19,7 +20,7 @@ async function readConfig() {
     const raw = await fs.readFile(CONFIG_PATH, 'utf8');
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed.enabledLeagues) && parsed.enabledLeagues.length > 0) {
-      return parsed;
+      return { ...DEFAULT_CONFIG, ...parsed };
     }
   } catch (_) {
     // fall through to default
@@ -37,7 +38,7 @@ router.get('/config', async (req, res) => {
 });
 
 router.post('/config', async (req, res) => {
-  const { enabledLeagues, teamFilters } = req.body;
+  const { enabledLeagues, teamFilters, recentDays } = req.body;
   if (!Array.isArray(enabledLeagues)) {
     return res.status(400).json({ error: 'enabledLeagues must be an array' });
   }
@@ -46,6 +47,7 @@ router.post('/config', async (req, res) => {
     teamFilters: (teamFilters && typeof teamFilters === 'object' && !Array.isArray(teamFilters))
       ? teamFilters
       : {},
+    recentDays: (Number.isInteger(recentDays) && recentDays >= 1) ? recentDays : DEFAULT_CONFIG.recentDays,
   };
   try {
     await fs.writeFile(CONFIG_PATH, JSON.stringify(config, null, 2));
@@ -58,7 +60,7 @@ router.post('/config', async (req, res) => {
 router.get('/scoreboard', async (req, res) => {
   try {
     const config = await readConfig();
-    const games = await sportsService.getScoreboard(config.enabledLeagues, config.teamFilters);
+    const games = await sportsService.getScoreboard(config.enabledLeagues, config.teamFilters, config.recentDays);
     res.json(games);
   } catch (err) {
     res.status(500).json({ error: err.message });
